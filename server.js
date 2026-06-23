@@ -101,7 +101,7 @@ function runAgent() {
   const protocol = RELAY_URL.startsWith('wss://') ? 'https://' : 'http://';
   const ingestUrl = RELAY_URL
     .replace(/^wss?:\/\//, protocol)
-    .replace(/\/ws\/telemetry\/agent\/?$/, '/api/telemetry/ingest');
+    .replace(/\/ws\/telemetry\/(agent|live)\/?$/, '/api/telemetry/ingest');
 
   async function sendPacket(packet) {
     try {
