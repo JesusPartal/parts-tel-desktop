@@ -148,6 +148,7 @@ ipcMain.handle('stop-agent', () => {
     detachAgentListeners();
     agentProcess.kill();
     agentProcess = null;
+    safeSend('agent-status', 'stopped');
     return 'stopped';
   }
   return 'not-running';

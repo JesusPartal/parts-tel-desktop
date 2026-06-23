@@ -103,6 +103,8 @@ async function startAgent() {
 
 async function stopAgent() {
   await window.api.stopAgent();
+  setStatus('stopped');
+  addLog('Agent stopped');
 }
 
 btnStart.addEventListener('click', startAgent);
