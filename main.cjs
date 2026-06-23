@@ -113,7 +113,7 @@ ipcMain.handle('start-agent', async (_e, cfg) => {
     // Token is NOT passed as CLI arg; server.js reads it from PARTS_TEL_TOKEN env var
   ];
 
-  agentProcess = spawn('node', args, {
+  agentProcess = spawn(process.execPath, args, {
     cwd: __dirname,
     stdio: ['ignore', 'pipe', 'pipe'],
     env,
