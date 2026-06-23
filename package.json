@@ -1,0 +1,21 @@
+{
+  "name": "parts-tel-desktop",
+  "version": "1.0.0",
+  "description": "iRacing Telemetry Agent - Windows GUI (includes parts-tel-server)",
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder build --win --config build.config.json"
+  },
+  "author": "RaceStrategist",
+  "license": "ISC",
+  "dependencies": {
+    "irsdk-node": "^4.4.0",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

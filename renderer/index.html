@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;">
+  <link rel="stylesheet" href="style.css">
+  <title>iRacing Telemetry Agent</title>
+</head>
+<body>
+  <div class="window-frame">
+    <div class="titlebar">
+      <div class="titlebar-drag">
+        <span class="app-title">iRacing Telemetry Agent</span>
+      </div>
+      <div class="titlebar-actions">
+        <button class="tb-btn" id="btnMinimize">&#9472;</button>
+        <button class="tb-btn tb-close" id="btnClose">&#10005;</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Stopped</span>
+        <span class="driver-badge" id="driverBadge" style="display:none;"></span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Relay Connection</div>
+        <div class="form-row">
+          <label>Relay URL</label>
+          <input type="text" id="relayUrl" placeholder="ws://host:3000/ws/telemetry/agent">
+        </div>
+        <div class="form-row">
+          <label>Driver ID</label>
+          <input type="text" id="driverId" placeholder="e.g. carlos">
+        </div>
+        <div class="form-row">
+          <label>Token</label>
+          <div class="input-group">
+            <input type="password" id="token" placeholder="Paste your agent token here">
+            <button class="btn-sm" id="btnToggleToken">&#128065;</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-start" id="btnStart">
+          <span class="btn-icon">&#9654;</span> Start Agent
+        </button>
+        <button class="btn btn-stop" id="btnStop" style="display:none;">
+          <span class="btn-icon">&#9632;</span> Stop Agent
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Log</div>
+        <div class="log-box" id="logBox">
+          <div class="log-placeholder">Ready. Configure and click Start Agent.</div>
+        </div>
+        <button class="btn-clear" id="btnClearLog">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
