@@ -98,16 +98,25 @@ function detachAgentListeners() {
 ipcMain.handle('start-agent', async (_e, cfg) => {
   if (agentProcess) return 'already-running';
 
+  // Pass token via environment variable instead of CLI arg (prevents process listing exposure)
+  const env = {
+    ...process.env,
+    PARTS_TEL_RELAY: cfg.relayUrl,
+    PARTS_TEL_DRIVER_ID: cfg.driverId,
+    PARTS_TEL_TOKEN: cfg.token,
+  };
+
   const args = [
     serverPath,
     `--relay=${cfg.relayUrl}`,
     `--driver=${cfg.driverId}`,
-    `--token=${cfg.token}`,
+    // Token is NOT passed as CLI arg; server.js reads it from PARTS_TEL_TOKEN env var
   ];
 
   agentProcess = spawn('node', args, {
     cwd: __dirname,
     stdio: ['ignore', 'pipe', 'pipe'],
+    env,
   });
 
   onAgentStdout = (data) => {

@@ -34,15 +34,26 @@ const AUTH_TOKEN = process.argv.find(a => a.startsWith('--token='))?.split('=')[
                 || process.env.PARTS_TEL_TOKEN
                 || agentCfg.token;
 
+// Clear token from env after reading to reduce exposure
+delete process.env.PARTS_TEL_TOKEN;
+
 if (RELAY_URL) {
-  console.log(`Agent mode: relay=${RELAY_URL}, driver=${DRIVER_ID}`);
+  // Validate WSS
+  if (!RELAY_URL.startsWith('wss://') && !RELAY_URL.startsWith('ws://')) {
+    console.error('Invalid relay URL. Must start with ws:// or wss://');
+    process.exit(1);
+  }
+  if (RELAY_URL.startsWith('ws://')) {
+    console.warn('WARNING: Using unencrypted ws:// relay. Token and data will be sent in cleartext.');
+  }
+  console.log(`Agent mode: relay=${RELAY_URL.replace(/\?.*$/, '')}, driver=${DRIVER_ID}`);
   runAgent();
 } else {
   console.log('Standalone mode: listening on ws://localhost:8080');
   runStandalone();
 }
 
-// ────────────────────── Standalone mode (original) ──────────────────────
+// ────────────────────── Standalone mode ──────────────────────
 async function runStandalone() {
   const { WebSocketServer, WebSocket } = await import('ws');
   const wss = new WebSocketServer({ port: 8080 });
@@ -80,35 +91,36 @@ async function runStandalone() {
   });
 }
 
-// ────────────────────── Relay agent mode (HTTP POST) ──────────────────────
+// ────────────────────── Relay agent mode (HTTP POST with Bearer token) ──────────────────────
 function runAgent() {
   let interval = null;
   let currentWorker = null;
   let lastPacket = null;
 
-  // Parse the relay URL into an ingest URL
+  // Convert relay URL to HTTP ingest URL
+  const protocol = RELAY_URL.startsWith('wss://') ? 'https://' : 'http://';
   const ingestUrl = RELAY_URL
-    .replace(/^ws(s)?:\/\//, (_, ssl) => ssl ? 'https://' : 'http://')
+    .replace(/^wss?:\/\//, protocol)
     .replace(/\/ws\/telemetry\/agent\/?$/, '/api/telemetry/ingest');
-
-  const fullUrl = `${ingestUrl}?token=${encodeURIComponent(AUTH_TOKEN || '')}&driverId=${encodeURIComponent(DRIVER_ID)}`;
 
   async function sendPacket(packet) {
     try {
-      const res = await fetch(fullUrl, {
+      const res = await fetch(ingestUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // Send token in Authorization header, not query param
+          'Authorization': AUTH_TOKEN ? `Bearer ${AUTH_TOKEN}` : '',
+          'X-Driver-Id': DRIVER_ID,
+        },
         body: JSON.stringify(packet),
       });
       if (!res.ok) {
         console.error(`Ingest error: ${res.status}`);
       }
-    } catch (err) {
-      // Silent retry on next tick
-    }
+    } catch { /* retry next tick */ }
   }
 
-  // Start worker and send data periodically
   currentWorker = spawnWorker((packet) => {
     lastPacket = packet;
   });
